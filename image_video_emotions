@@ -1,1 +1,1905 @@
-{"metadata":{"kernelspec":{"language":"python","display_name":"Python 3","name":"python3"},"language_info":{"name":"python","version":"3.10.14","mimetype":"text/x-python","codemirror_mode":{"name":"ipython","version":3},"pygments_lexer":"ipython3","nbconvert_exporter":"python","file_extension":".py"},"kaggle":{"accelerator":"gpu","dataSources":[{"sourceId":9282942,"sourceType":"datasetVersion","datasetId":5618966}],"dockerImageVersionId":30762,"isInternetEnabled":true,"language":"python","sourceType":"notebook","isGpuEnabled":true}},"nbformat_minor":4,"nbformat":4,"cells":[{"cell_type":"code","source":"# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session","metadata":{"_uuid":"8f2839f25d086af736a60e9eeb907d3b93b6e0e5","_cell_guid":"b1076dfc-b9ad-4769-8c92-a6c4dae69d19","execution":{"iopub.status.busy":"2024-08-30T16:25:16.805502Z","iopub.execute_input":"2024-08-30T16:25:16.805961Z","iopub.status.idle":"2024-08-30T16:25:16.813159Z","shell.execute_reply.started":"2024-08-30T16:25:16.805919Z","shell.execute_reply":"2024-08-30T16:25:16.811983Z"},"trusted":true},"execution_count":3,"outputs":[]},{"cell_type":"code","source":"pip install yt-dlp\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:40:43.664851Z","iopub.execute_input":"2024-08-30T16:40:43.665567Z","iopub.status.idle":"2024-08-30T16:41:03.478625Z","shell.execute_reply.started":"2024-08-30T16:40:43.665527Z","shell.execute_reply":"2024-08-30T16:41:03.477255Z"},"trusted":true},"execution_count":33,"outputs":[{"name":"stdout","text":"Collecting yt-dlp\n  Downloading yt_dlp-2024.8.6-py3-none-any.whl.metadata (170 kB)\n\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m170.1/170.1 kB\u001b[0m \u001b[31m3.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0ma \u001b[36m0:00:01\u001b[0m\n\u001b[?25hRequirement already satisfied: brotli in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (1.1.0)\nRequirement already satisfied: certifi in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (2024.7.4)\nCollecting mutagen (from yt-dlp)\n  Downloading mutagen-1.47.0-py3-none-any.whl.metadata (1.7 kB)\nCollecting pycryptodomex (from yt-dlp)\n  Downloading pycryptodomex-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.4 kB)\nRequirement already satisfied: requests<3,>=2.32.2 in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (2.32.3)\nRequirement already satisfied: urllib3<3,>=1.26.17 in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (1.26.18)\nRequirement already satisfied: websockets>=12.0 in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (12.0)\nRequirement already satisfied: charset-normalizer<4,>=2 in /opt/conda/lib/python3.10/site-packages (from requests<3,>=2.32.2->yt-dlp) (3.3.2)\nRequirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.10/site-packages (from requests<3,>=2.32.2->yt-dlp) (3.7)\nDownloading yt_dlp-2024.8.6-py3-none-any.whl (3.1 MB)\n\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m3.1/3.1 MB\u001b[0m \u001b[31m40.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m00:01\u001b[0m00:01\u001b[0m\n\u001b[?25hDownloading mutagen-1.47.0-py3-none-any.whl (194 kB)\n\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m194.4/194.4 kB\u001b[0m \u001b[31m11.3 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n\u001b[?25hDownloading pycryptodomex-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)\n\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m2.1/2.1 MB\u001b[0m \u001b[31m57.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m:00:01\u001b[0m\n\u001b[?25hInstalling collected packages: pycryptodomex, mutagen, yt-dlp\nSuccessfully installed mutagen-1.47.0 pycryptodomex-3.20.0 yt-dlp-2024.8.6\nNote: you may need to restart the kernel to use updated packages.\n","output_type":"stream"}]},{"cell_type":"code","source":"pip install --upgrade pytube\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:39:38.104482Z","iopub.execute_input":"2024-08-30T16:39:38.105489Z","iopub.status.idle":"2024-08-30T16:39:53.368953Z","shell.execute_reply.started":"2024-08-30T16:39:38.105442Z","shell.execute_reply":"2024-08-30T16:39:53.367544Z"},"trusted":true},"execution_count":31,"outputs":[{"name":"stdout","text":"Requirement already satisfied: pytube in /opt/conda/lib/python3.10/site-packages (15.0.0)\nNote: you may need to restart the kernel to use updated packages.\n","output_type":"stream"}]},{"cell_type":"code","source":"pip install pytube opencv-python-headless transformers\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:38:02.372284Z","iopub.execute_input":"2024-08-30T16:38:02.372682Z","iopub.status.idle":"2024-08-30T16:38:18.092868Z","shell.execute_reply.started":"2024-08-30T16:38:02.372647Z","shell.execute_reply":"2024-08-30T16:38:18.091520Z"},"trusted":true},"execution_count":28,"outputs":[{"name":"stderr","text":"/opt/conda/lib/python3.10/pty.py:89: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.\n  pid, fd = os.forkpty()\n","output_type":"stream"},{"name":"stdout","text":"Collecting pytube\n  Downloading pytube-15.0.0-py3-none-any.whl.metadata (5.0 kB)\nRequirement already satisfied: opencv-python-headless in /opt/conda/lib/python3.10/site-packages (4.10.0.84)\nRequirement already satisfied: transformers in /opt/conda/lib/python3.10/site-packages (4.44.0)\nRequirement already satisfied: numpy>=1.21.2 in /opt/conda/lib/python3.10/site-packages (from opencv-python-headless) (1.26.4)\nRequirement already satisfied: filelock in /opt/conda/lib/python3.10/site-packages (from transformers) (3.15.1)\nRequirement already satisfied: huggingface-hub<1.0,>=0.23.2 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.24.6)\nRequirement already satisfied: packaging>=20.0 in /opt/conda/lib/python3.10/site-packages (from transformers) (21.3)\nRequirement already satisfied: pyyaml>=5.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (6.0.2)\nRequirement already satisfied: regex!=2019.12.17 in /opt/conda/lib/python3.10/site-packages (from transformers) (2024.5.15)\nRequirement already satisfied: requests in /opt/conda/lib/python3.10/site-packages (from transformers) (2.32.3)\nRequirement already satisfied: safetensors>=0.4.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.4.4)\nRequirement already satisfied: tokenizers<0.20,>=0.19 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.19.1)\nRequirement already satisfied: tqdm>=4.27 in /opt/conda/lib/python3.10/site-packages (from transformers) (4.66.4)\nRequirement already satisfied: fsspec>=2023.5.0 in /opt/conda/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.23.2->transformers) (2024.6.1)\nRequirement already satisfied: typing-extensions>=3.7.4.3 in /opt/conda/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.23.2->transformers) (4.12.2)\nRequirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /opt/conda/lib/python3.10/site-packages (from packaging>=20.0->transformers) (3.1.2)\nRequirement already satisfied: charset-normalizer<4,>=2 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.3.2)\nRequirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.7)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (1.26.18)\nRequirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (2024.7.4)\nDownloading pytube-15.0.0-py3-none-any.whl (57 kB)\n\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m57.6/57.6 kB\u001b[0m \u001b[31m1.6 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n\u001b[?25hInstalling collected packages: pytube\nSuccessfully installed pytube-15.0.0\nNote: you may need to restart the kernel to use updated packages.\n","output_type":"stream"}]},{"cell_type":"code","source":"pip install transformers torch torchvision\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:25:18.978236Z","iopub.execute_input":"2024-08-30T16:25:18.978653Z","iopub.status.idle":"2024-08-30T16:25:35.823904Z","shell.execute_reply.started":"2024-08-30T16:25:18.978613Z","shell.execute_reply":"2024-08-30T16:25:35.822585Z"},"trusted":true},"execution_count":4,"outputs":[{"name":"stdout","text":"Requirement already satisfied: transformers in /opt/conda/lib/python3.10/site-packages (4.44.0)\nRequirement already satisfied: torch in /opt/conda/lib/python3.10/site-packages (2.4.0)\nRequirement already satisfied: torchvision in /opt/conda/lib/python3.10/site-packages (0.19.0)\nRequirement already satisfied: filelock in /opt/conda/lib/python3.10/site-packages (from transformers) (3.15.1)\nRequirement already satisfied: huggingface-hub<1.0,>=0.23.2 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.24.6)\nRequirement already satisfied: numpy>=1.17 in /opt/conda/lib/python3.10/site-packages (from transformers) (1.26.4)\nRequirement already satisfied: packaging>=20.0 in /opt/conda/lib/python3.10/site-packages (from transformers) (21.3)\nRequirement already satisfied: pyyaml>=5.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (6.0.2)\nRequirement already satisfied: regex!=2019.12.17 in /opt/conda/lib/python3.10/site-packages (from transformers) (2024.5.15)\nRequirement already satisfied: requests in /opt/conda/lib/python3.10/site-packages (from transformers) (2.32.3)\nRequirement already satisfied: safetensors>=0.4.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.4.4)\nRequirement already satisfied: tokenizers<0.20,>=0.19 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.19.1)\nRequirement already satisfied: tqdm>=4.27 in /opt/conda/lib/python3.10/site-packages (from transformers) (4.66.4)\nRequirement already satisfied: typing-extensions>=4.8.0 in /opt/conda/lib/python3.10/site-packages (from torch) (4.12.2)\nRequirement already satisfied: sympy in /opt/conda/lib/python3.10/site-packages (from torch) (1.13.2)\nRequirement already satisfied: networkx in /opt/conda/lib/python3.10/site-packages (from torch) (3.3)\nRequirement already satisfied: jinja2 in /opt/conda/lib/python3.10/site-packages (from torch) (3.1.4)\nRequirement already satisfied: fsspec in /opt/conda/lib/python3.10/site-packages (from torch) (2024.6.1)\nRequirement already satisfied: pillow!=8.3.*,>=5.3.0 in /opt/conda/lib/python3.10/site-packages (from torchvision) (9.5.0)\nRequirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /opt/conda/lib/python3.10/site-packages (from packaging>=20.0->transformers) (3.1.2)\nRequirement already satisfied: MarkupSafe>=2.0 in /opt/conda/lib/python3.10/site-packages (from jinja2->torch) (2.1.5)\nRequirement already satisfied: charset-normalizer<4,>=2 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.3.2)\nRequirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.7)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (1.26.18)\nRequirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (2024.7.4)\nRequirement already satisfied: mpmath<1.4,>=1.1.0 in /opt/conda/lib/python3.10/site-packages (from sympy->torch) (1.3.0)\nNote: you may need to restart the kernel to use updated packages.\n","output_type":"stream"}]},{"cell_type":"code","source":"from transformers import AutoImageProcessor, AutoModelForImageClassification\nfrom PIL import Image\nimport requests\nfrom io import BytesIO\n\n# Load the image processor and model\nprocessor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\nmodel = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:31:07.266485Z","iopub.execute_input":"2024-08-30T16:31:07.266921Z","iopub.status.idle":"2024-08-30T16:31:14.566248Z","shell.execute_reply.started":"2024-08-30T16:31:07.266881Z","shell.execute_reply":"2024-08-30T16:31:14.565251Z"},"trusted":true},"execution_count":8,"outputs":[{"output_type":"display_data","data":{"text/plain":"preprocessor_config.json:   0%|          | 0.00/578 [00:00<?, ?B/s]","application/vnd.jupyter.widget-view+json":{"version_major":2,"version_minor":0,"model_id":"63a8b832929e486183ec52b50330898c"}},"metadata":{}},{"output_type":"display_data","data":{"text/plain":"config.json:   0%|          | 0.00/907 [00:00<?, ?B/s]","application/vnd.jupyter.widget-view+json":{"version_major":2,"version_minor":0,"model_id":"862ecef38c2940deb3ff54c8406edbd2"}},"metadata":{}},{"output_type":"display_data","data":{"text/plain":"model.safetensors:   0%|          | 0.00/343M [00:00<?, ?B/s]","application/vnd.jupyter.widget-view+json":{"version_major":2,"version_minor":0,"model_id":"09b5579b0e204334884ae0492a438360"}},"metadata":{}}]},{"cell_type":"code","source":"from PIL import Image\n\n# Load an image from a local path\nimg_path = '/kaggle/input/imaged/qwew.jpg'  # Replace with your local file path\nimg = Image.open(img_path)\n\n# Preprocess the image\ninputs = processor(images=img, return_tensors=\"pt\")\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:31:45.909051Z","iopub.execute_input":"2024-08-30T16:31:45.909496Z","iopub.status.idle":"2024-08-30T16:31:45.955277Z","shell.execute_reply.started":"2024-08-30T16:31:45.909452Z","shell.execute_reply":"2024-08-30T16:31:45.954302Z"},"trusted":true},"execution_count":10,"outputs":[]},{"cell_type":"code","source":"from PIL import Image\nfrom transformers import AutoImageProcessor, AutoModelForImageClassification\n\n# Load the image processor and model\nprocessor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\nmodel = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n\n# Load an image from a local path\nimg_path = '/kaggle/input/imaged/girl.jpg'  # Replace with your local file path\nimg = Image.open(img_path)\n\n# Preprocess the image\ninputs = processor(images=img, return_tensors=\"pt\")\n\n# Make predictions\noutputs = model(**inputs)\n\n# Get the predicted class\nlogits = outputs.logits\npredicted_class = logits.argmax(-1).item()\n\n# Access the model's labels\nlabels = model.config.id2label\npredicted_label = labels[predicted_class]\n\nprint(f'Predicted emotion: {predicted_label}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:34:01.350318Z","iopub.execute_input":"2024-08-30T16:34:01.350744Z","iopub.status.idle":"2024-08-30T16:34:01.820946Z","shell.execute_reply.started":"2024-08-30T16:34:01.350703Z","shell.execute_reply":"2024-08-30T16:34:01.819759Z"},"trusted":true},"execution_count":23,"outputs":[{"name":"stdout","text":"Predicted emotion: happy\n","output_type":"stream"}]},{"cell_type":"code","source":"from PIL import Image\nimport requests\nfrom io import BytesIO\nfrom transformers import AutoImageProcessor, AutoModelForImageClassification\n\n# Load the image processor and model\nprocessor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\nmodel = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n\n# Define the URL of the image\nurl = 'https://th.bing.com/th/id/OIP.CEQVIV0C_Dv-MYd6pB4E5gHaEK?rs=1&pid=ImgDetMain'  # Replace with your image URL\n\n# Fetch the image from the URL\nresponse = requests.get(url)\nimg = Image.open(BytesIO(response.content))\n\n# Preprocess the image\ninputs = processor(images=img, return_tensors=\"pt\")\n\n# Make predictions\noutputs = model(**inputs)\n\n# Get the predicted class\nlogits = outputs.logits\npredicted_class = logits.argmax(-1).item()\n\n# Access the model's labels\nlabels = model.config.id2label\npredicted_label = labels[predicted_class]\n\nprint(f'Predicted emotion: {predicted_label}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T17:00:15.351297Z","iopub.execute_input":"2024-08-30T17:00:15.352158Z","iopub.status.idle":"2024-08-30T17:00:15.928995Z","shell.execute_reply.started":"2024-08-30T17:00:15.352113Z","shell.execute_reply":"2024-08-30T17:00:15.926715Z"},"trusted":true},"execution_count":50,"outputs":[{"name":"stdout","text":"Predicted emotion: angry\n","output_type":"stream"}]},{"cell_type":"code","source":"import yt_dlp\nimport cv2\nimport numpy as np\nfrom PIL import Image\nfrom transformers import AutoImageProcessor, AutoModelForImageClassification\nimport os\n\n# Function to delete the existing video file\ndef cleanup(file_path):\n    if os.path.exists(file_path):\n        os.remove(file_path)\n\n# Function to download video using yt-dlp\ndef download_video(url, output_path='temp_video.mp4'):\n    cleanup(output_path)  # Ensure any existing video is deleted\n    ydl_opts = {\n        'format': 'mp4',\n        'outtmpl': output_path,\n    }\n    with yt_dlp.YoutubeDL(ydl_opts) as ydl:\n        ydl.download([url])\n\n# Extract frames from video\ndef extract_frames_from_video(video_path, num_frames=10):\n    frames = []\n    cap = cv2.VideoCapture(video_path)\n    \n    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n    interval = total_frames // num_frames\n    \n    for i in range(num_frames):\n        cap.set(cv2.CAP_PROP_POS_FRAMES, i * interval)\n        ret, frame = cap.read()\n        if ret:\n            frames.append(frame)\n    \n    cap.release()\n    return frames\n\n# Predict emotion for each frame\ndef predict_emotion(frames, processor, model):\n    predictions = []\n    for frame in frames:\n        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))\n        inputs = processor(images=img, return_tensors=\"pt\")\n        outputs = model(**inputs)\n        logits = outputs.logits\n        predicted_class = logits.argmax(-1).item()\n        labels = model.config.id2label\n        predicted_label = labels[predicted_class]\n        predictions.append(predicted_label)\n    return predictions\n\n# Main function\ndef analyze_video_emotion(youtube_url):\n    # Load model\n    processor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\n    model = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n\n    # Download video\n    download_video(youtube_url)\n    \n    # Extract frames from the downloaded video\n    frames = extract_frames_from_video('temp_video.mp4', num_frames=10)\n    \n    # Predict emotion for each frame\n    predictions = predict_emotion(frames, processor, model)\n    \n    # Calculate the overall emotion\n    overall_emotion = max(set(predictions), key=predictions.count)\n    return overall_emotion\n\n# Example usage\nyoutube_url = 'https://www.youtube.com/watch?v=SpvC6jlqldk' #GF\noverall_emotion = analyze_video_emotion(youtube_url)\nprint(f'Overall emotion: {overall_emotion}')\n\n# Test another video\nyoutube_url_new = 'https://www.youtube.com/watch?v=vBk5y0iu3yI'#SC\noverall_emotion_new = analyze_video_emotion(youtube_url_new)\nprint(f'Overall emotion for new video: {overall_emotion_new}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T17:01:01.637434Z","iopub.execute_input":"2024-08-30T17:01:01.637896Z","iopub.status.idle":"2024-08-30T17:01:17.201365Z","shell.execute_reply.started":"2024-08-30T17:01:01.637855Z","shell.execute_reply":"2024-08-30T17:01:17.200017Z"},"trusted":true},"execution_count":52,"outputs":[{"name":"stdout","text":"[youtube] Extracting URL: https://www.youtube.com/watch?v=SpvC6jlqldk\n[youtube] SpvC6jlqldk: Downloading webpage\n[youtube] SpvC6jlqldk: Downloading ios player API JSON\n[youtube] SpvC6jlqldk: Downloading web creator player API JSON\n[youtube] SpvC6jlqldk: Downloading m3u8 information\n[info] SpvC6jlqldk: Downloading 1 format(s): 18\n[download] Destination: temp_video.mp4\n[download] 100% of   47.91MiB in 00:00:00 at 57.60MiB/s    \nOverall emotion: angry\n[youtube] Extracting URL: https://www.youtube.com/watch?v=vBk5y0iu3yI\n[youtube] vBk5y0iu3yI: Downloading webpage\n[youtube] vBk5y0iu3yI: Downloading ios player API JSON\n[youtube] vBk5y0iu3yI: Downloading web creator player API JSON\n[youtube] vBk5y0iu3yI: Downloading m3u8 information\n[info] vBk5y0iu3yI: Downloading 1 format(s): 18\n[download] Destination: temp_video.mp4\n[download] 100% of   42.33MiB in 00:00:00 at 52.31MiB/s    \nOverall emotion for new video: angry\n","output_type":"stream"}]},{"cell_type":"code","source":"#K.H SPEECH\n\nyoutube_url_new3 = 'https://www.youtube.com/watch?v=1aZLL63wlTU'\noverall_emotion_new = analyze_video_emotion(youtube_url_new3)\nprint(f'Overall emotion for new video: {overall_emotion_new}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:53:28.036754Z","iopub.execute_input":"2024-08-30T16:53:28.037270Z","iopub.status.idle":"2024-08-30T16:53:36.772046Z","shell.execute_reply.started":"2024-08-30T16:53:28.037224Z","shell.execute_reply":"2024-08-30T16:53:36.770861Z"},"trusted":true},"execution_count":46,"outputs":[{"name":"stdout","text":"[youtube] Extracting URL: https://www.youtube.com/watch?v=1aZLL63wlTU\n[youtube] 1aZLL63wlTU: Downloading webpage\n[youtube] 1aZLL63wlTU: Downloading ios player API JSON\n[youtube] 1aZLL63wlTU: Downloading web creator player API JSON\n[youtube] 1aZLL63wlTU: Downloading player 70d1710a\n[youtube] 1aZLL63wlTU: Downloading m3u8 information\n[info] 1aZLL63wlTU: Downloading 1 format(s): 18\n[download] Destination: temp_video.mp4\n[download] 100% of   99.21MiB in 00:00:01 at 51.48MiB/s    \nOverall emotion for new video: happy\n","output_type":"stream"}]},{"cell_type":"code","source":"#JDV SPEECH\n\nyoutube_url_new3 = 'https://www.youtube.com/watch?v=cYzXBA7zucI'\noverall_emotion_new = analyze_video_emotion(youtube_url_new3)\nprint(f'Overall emotion for new video: {overall_emotion_new}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:54:01.822115Z","iopub.execute_input":"2024-08-30T16:54:01.823002Z","iopub.status.idle":"2024-08-30T16:54:10.919849Z","shell.execute_reply.started":"2024-08-30T16:54:01.822956Z","shell.execute_reply":"2024-08-30T16:54:10.918701Z"},"trusted":true},"execution_count":47,"outputs":[{"name":"stdout","text":"[youtube] Extracting URL: https://www.youtube.com/watch?v=cYzXBA7zucI\n[youtube] cYzXBA7zucI: Downloading webpage\n[youtube] cYzXBA7zucI: Downloading ios player API JSON\n[youtube] cYzXBA7zucI: Downloading web creator player API JSON\n[youtube] cYzXBA7zucI: Downloading m3u8 information\n[info] cYzXBA7zucI: Downloading 1 format(s): 18\n[download] Destination: temp_video.mp4\n[download] 100% of   93.81MiB in 00:00:02 at 35.35MiB/s    \nOverall emotion for new video: angry\n","output_type":"stream"}]},{"cell_type":"code","source":"#T SPEECH\n\nyoutube_url_new3 = 'https://www.youtube.com/watch?v=YG37yFh7SzM'\noverall_emotion_new = analyze_video_emotion(youtube_url_new3)\nprint(f'Overall emotion for new video: {overall_emotion_new}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:56:09.444889Z","iopub.execute_input":"2024-08-30T16:56:09.445340Z","iopub.status.idle":"2024-08-30T16:56:19.139115Z","shell.execute_reply.started":"2024-08-30T16:56:09.445302Z","shell.execute_reply":"2024-08-30T16:56:19.137893Z"},"trusted":true},"execution_count":48,"outputs":[{"name":"stdout","text":"[youtube] Extracting URL: https://www.youtube.com/watch?v=YG37yFh7SzM\n[youtube] YG37yFh7SzM: Downloading webpage\n[youtube] YG37yFh7SzM: Downloading ios player API JSON\n[youtube] YG37yFh7SzM: Downloading web creator player API JSON\n[youtube] YG37yFh7SzM: Downloading m3u8 information\n[info] YG37yFh7SzM: Downloading 1 format(s): 18\n[download] Destination: temp_video.mp4\n[download] 100% of   52.10MiB in 00:00:01 at 38.75MiB/s    \nOverall emotion for new video: angry\n","output_type":"stream"}]},{"cell_type":"code","source":"#WALZ SPEECH\n\nyoutube_url_new3 = 'https://www.youtube.com/watch?v=Mf0u5MJEjhw'\noverall_emotion_new = analyze_video_emotion(youtube_url_new3)\nprint(f'Overall emotion for new video: {overall_emotion_new}')\n","metadata":{"execution":{"iopub.status.busy":"2024-08-30T16:57:20.630120Z","iopub.execute_input":"2024-08-30T16:57:20.630599Z","iopub.status.idle":"2024-08-30T16:57:28.458099Z","shell.execute_reply.started":"2024-08-30T16:57:20.630555Z","shell.execute_reply":"2024-08-30T16:57:28.456906Z"},"trusted":true},"execution_count":49,"outputs":[{"name":"stdout","text":"[youtube] Extracting URL: https://www.youtube.com/watch?v=Mf0u5MJEjhw\n[youtube] Mf0u5MJEjhw: Downloading webpage\n[youtube] Mf0u5MJEjhw: Downloading ios player API JSON\n[youtube] Mf0u5MJEjhw: Downloading web creator player API JSON\n[youtube] Mf0u5MJEjhw: Downloading m3u8 information\n[info] Mf0u5MJEjhw: Downloading 1 format(s): 18\n[download] Destination: temp_video.mp4\n[download] 100% of   67.00MiB in 00:00:01 at 44.94MiB/s    \nOverall emotion for new video: angry\n","output_type":"stream"}]},{"cell_type":"code","source":"","metadata":{},"execution_count":null,"outputs":[]}]}
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "4d496ffa",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:06:48.016164Z",
+     "iopub.status.busy": "2024-08-30T17:06:48.015795Z",
+     "iopub.status.idle": "2024-08-30T17:06:48.794354Z",
+     "shell.execute_reply": "2024-08-30T17:06:48.793408Z"
+    },
+    "papermill": {
+     "duration": 0.787688,
+     "end_time": "2024-08-30T17:06:48.796660",
+     "exception": false,
+     "start_time": "2024-08-30T17:06:48.008972",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/imaged/feg.jpg\n",
+      "/kaggle/input/imaged/wwew.jpg\n",
+      "/kaggle/input/imaged/qwew.jpg\n",
+      "/kaggle/input/imaged/222.jpg\n",
+      "/kaggle/input/imaged/girl.jpg\n",
+      "/kaggle/input/imaged/happydace.jpg\n",
+      "/kaggle/input/imaged/2333.jpg\n"
+     ]
+    }
+   ],
+   "source": [
+    "# This Python 3 environment comes with many helpful analytics libraries installed\n",
+    "# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n",
+    "# For example, here's several helpful packages to load\n",
+    "\n",
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))\n",
+    "\n",
+    "# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n",
+    "# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "bc91faf0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:06:48.807737Z",
+     "iopub.status.busy": "2024-08-30T17:06:48.807320Z",
+     "iopub.status.idle": "2024-08-30T17:07:06.769532Z",
+     "shell.execute_reply": "2024-08-30T17:07:06.768304Z"
+    },
+    "papermill": {
+     "duration": 17.96993,
+     "end_time": "2024-08-30T17:07:06.771615",
+     "exception": false,
+     "start_time": "2024-08-30T17:06:48.801685",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Collecting yt-dlp\r\n",
+      "  Downloading yt_dlp-2024.8.6-py3-none-any.whl.metadata (170 kB)\r\n",
+      "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m170.1/170.1 kB\u001b[0m \u001b[31m4.8 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\r\n",
+      "\u001b[?25hRequirement already satisfied: brotli in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (1.1.0)\r\n",
+      "Requirement already satisfied: certifi in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (2024.7.4)\r\n",
+      "Collecting mutagen (from yt-dlp)\r\n",
+      "  Downloading mutagen-1.47.0-py3-none-any.whl.metadata (1.7 kB)\r\n",
+      "Collecting pycryptodomex (from yt-dlp)\r\n",
+      "  Downloading pycryptodomex-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.4 kB)\r\n",
+      "Requirement already satisfied: requests<3,>=2.32.2 in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (2.32.3)\r\n",
+      "Requirement already satisfied: urllib3<3,>=1.26.17 in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (1.26.18)\r\n",
+      "Requirement already satisfied: websockets>=12.0 in /opt/conda/lib/python3.10/site-packages (from yt-dlp) (12.0)\r\n",
+      "Requirement already satisfied: charset-normalizer<4,>=2 in /opt/conda/lib/python3.10/site-packages (from requests<3,>=2.32.2->yt-dlp) (3.3.2)\r\n",
+      "Requirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.10/site-packages (from requests<3,>=2.32.2->yt-dlp) (3.7)\r\n",
+      "Downloading yt_dlp-2024.8.6-py3-none-any.whl (3.1 MB)\r\n",
+      "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m3.1/3.1 MB\u001b[0m \u001b[31m60.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\r\n",
+      "\u001b[?25hDownloading mutagen-1.47.0-py3-none-any.whl (194 kB)\r\n",
+      "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m194.4/194.4 kB\u001b[0m \u001b[31m13.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\r\n",
+      "\u001b[?25hDownloading pycryptodomex-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)\r\n",
+      "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m2.1/2.1 MB\u001b[0m \u001b[31m64.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\r\n",
+      "\u001b[?25hInstalling collected packages: pycryptodomex, mutagen, yt-dlp\r\n",
+      "Successfully installed mutagen-1.47.0 pycryptodomex-3.20.0 yt-dlp-2024.8.6\r\n",
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip install yt-dlp\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "87ef9309",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:07:06.786129Z",
+     "iopub.status.busy": "2024-08-30T17:07:06.785399Z",
+     "iopub.status.idle": "2024-08-30T17:07:19.965720Z",
+     "shell.execute_reply": "2024-08-30T17:07:19.964520Z"
+    },
+    "papermill": {
+     "duration": 13.189987,
+     "end_time": "2024-08-30T17:07:19.967992",
+     "exception": false,
+     "start_time": "2024-08-30T17:07:06.778005",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Collecting pytube\r\n",
+      "  Downloading pytube-15.0.0-py3-none-any.whl.metadata (5.0 kB)\r\n",
+      "Downloading pytube-15.0.0-py3-none-any.whl (57 kB)\r\n",
+      "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m57.6/57.6 kB\u001b[0m \u001b[31m2.0 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\r\n",
+      "\u001b[?25hInstalling collected packages: pytube\r\n",
+      "Successfully installed pytube-15.0.0\r\n",
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip install --upgrade pytube\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "1bee3121",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:07:19.982827Z",
+     "iopub.status.busy": "2024-08-30T17:07:19.982434Z",
+     "iopub.status.idle": "2024-08-30T17:07:33.106069Z",
+     "shell.execute_reply": "2024-08-30T17:07:33.105006Z"
+    },
+    "papermill": {
+     "duration": 13.133648,
+     "end_time": "2024-08-30T17:07:33.108312",
+     "exception": false,
+     "start_time": "2024-08-30T17:07:19.974664",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: pytube in /opt/conda/lib/python3.10/site-packages (15.0.0)\r\n",
+      "Requirement already satisfied: opencv-python-headless in /opt/conda/lib/python3.10/site-packages (4.10.0.84)\r\n",
+      "Requirement already satisfied: transformers in /opt/conda/lib/python3.10/site-packages (4.44.0)\r\n",
+      "Requirement already satisfied: numpy>=1.21.2 in /opt/conda/lib/python3.10/site-packages (from opencv-python-headless) (1.26.4)\r\n",
+      "Requirement already satisfied: filelock in /opt/conda/lib/python3.10/site-packages (from transformers) (3.15.1)\r\n",
+      "Requirement already satisfied: huggingface-hub<1.0,>=0.23.2 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.24.6)\r\n",
+      "Requirement already satisfied: packaging>=20.0 in /opt/conda/lib/python3.10/site-packages (from transformers) (21.3)\r\n",
+      "Requirement already satisfied: pyyaml>=5.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (6.0.2)\r\n",
+      "Requirement already satisfied: regex!=2019.12.17 in /opt/conda/lib/python3.10/site-packages (from transformers) (2024.5.15)\r\n",
+      "Requirement already satisfied: requests in /opt/conda/lib/python3.10/site-packages (from transformers) (2.32.3)\r\n",
+      "Requirement already satisfied: safetensors>=0.4.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.4.4)\r\n",
+      "Requirement already satisfied: tokenizers<0.20,>=0.19 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.19.1)\r\n",
+      "Requirement already satisfied: tqdm>=4.27 in /opt/conda/lib/python3.10/site-packages (from transformers) (4.66.4)\r\n",
+      "Requirement already satisfied: fsspec>=2023.5.0 in /opt/conda/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.23.2->transformers) (2024.6.1)\r\n",
+      "Requirement already satisfied: typing-extensions>=3.7.4.3 in /opt/conda/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.23.2->transformers) (4.12.2)\r\n",
+      "Requirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /opt/conda/lib/python3.10/site-packages (from packaging>=20.0->transformers) (3.1.2)\r\n",
+      "Requirement already satisfied: charset-normalizer<4,>=2 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.3.2)\r\n",
+      "Requirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.7)\r\n",
+      "Requirement already satisfied: urllib3<3,>=1.21.1 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (1.26.18)\r\n",
+      "Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (2024.7.4)\r\n",
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip install pytube opencv-python-headless transformers\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "6a717ccc",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:07:33.124148Z",
+     "iopub.status.busy": "2024-08-30T17:07:33.123797Z",
+     "iopub.status.idle": "2024-08-30T17:07:46.150170Z",
+     "shell.execute_reply": "2024-08-30T17:07:46.148981Z"
+    },
+    "papermill": {
+     "duration": 13.037065,
+     "end_time": "2024-08-30T17:07:46.152499",
+     "exception": false,
+     "start_time": "2024-08-30T17:07:33.115434",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: transformers in /opt/conda/lib/python3.10/site-packages (4.44.0)\r\n",
+      "Requirement already satisfied: torch in /opt/conda/lib/python3.10/site-packages (2.4.0)\r\n",
+      "Requirement already satisfied: torchvision in /opt/conda/lib/python3.10/site-packages (0.19.0)\r\n",
+      "Requirement already satisfied: filelock in /opt/conda/lib/python3.10/site-packages (from transformers) (3.15.1)\r\n",
+      "Requirement already satisfied: huggingface-hub<1.0,>=0.23.2 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.24.6)\r\n",
+      "Requirement already satisfied: numpy>=1.17 in /opt/conda/lib/python3.10/site-packages (from transformers) (1.26.4)\r\n",
+      "Requirement already satisfied: packaging>=20.0 in /opt/conda/lib/python3.10/site-packages (from transformers) (21.3)\r\n",
+      "Requirement already satisfied: pyyaml>=5.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (6.0.2)\r\n",
+      "Requirement already satisfied: regex!=2019.12.17 in /opt/conda/lib/python3.10/site-packages (from transformers) (2024.5.15)\r\n",
+      "Requirement already satisfied: requests in /opt/conda/lib/python3.10/site-packages (from transformers) (2.32.3)\r\n",
+      "Requirement already satisfied: safetensors>=0.4.1 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.4.4)\r\n",
+      "Requirement already satisfied: tokenizers<0.20,>=0.19 in /opt/conda/lib/python3.10/site-packages (from transformers) (0.19.1)\r\n",
+      "Requirement already satisfied: tqdm>=4.27 in /opt/conda/lib/python3.10/site-packages (from transformers) (4.66.4)\r\n",
+      "Requirement already satisfied: typing-extensions>=4.8.0 in /opt/conda/lib/python3.10/site-packages (from torch) (4.12.2)\r\n",
+      "Requirement already satisfied: sympy in /opt/conda/lib/python3.10/site-packages (from torch) (1.13.2)\r\n",
+      "Requirement already satisfied: networkx in /opt/conda/lib/python3.10/site-packages (from torch) (3.3)\r\n",
+      "Requirement already satisfied: jinja2 in /opt/conda/lib/python3.10/site-packages (from torch) (3.1.4)\r\n",
+      "Requirement already satisfied: fsspec in /opt/conda/lib/python3.10/site-packages (from torch) (2024.6.1)\r\n",
+      "Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in /opt/conda/lib/python3.10/site-packages (from torchvision) (9.5.0)\r\n",
+      "Requirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /opt/conda/lib/python3.10/site-packages (from packaging>=20.0->transformers) (3.1.2)\r\n",
+      "Requirement already satisfied: MarkupSafe>=2.0 in /opt/conda/lib/python3.10/site-packages (from jinja2->torch) (2.1.5)\r\n",
+      "Requirement already satisfied: charset-normalizer<4,>=2 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.3.2)\r\n",
+      "Requirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (3.7)\r\n",
+      "Requirement already satisfied: urllib3<3,>=1.21.1 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (1.26.18)\r\n",
+      "Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.10/site-packages (from requests->transformers) (2024.7.4)\r\n",
+      "Requirement already satisfied: mpmath<1.4,>=1.1.0 in /opt/conda/lib/python3.10/site-packages (from sympy->torch) (1.3.0)\r\n",
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip install transformers torch torchvision\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "e57b3d1e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:07:46.169721Z",
+     "iopub.status.busy": "2024-08-30T17:07:46.169301Z",
+     "iopub.status.idle": "2024-08-30T17:08:06.667275Z",
+     "shell.execute_reply": "2024-08-30T17:08:06.666436Z"
+    },
+    "papermill": {
+     "duration": 20.509385,
+     "end_time": "2024-08-30T17:08:06.669668",
+     "exception": false,
+     "start_time": "2024-08-30T17:07:46.160283",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "13650740844b42b5911c58934d7da880",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "preprocessor_config.json:   0%|          | 0.00/578 [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "686b3c44eb934f7b915338d0a2330ce3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "config.json:   0%|          | 0.00/907 [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "0a3e8a2773c447099d5ef48ffe62ddd3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "model.safetensors:   0%|          | 0.00/343M [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "from transformers import AutoImageProcessor, AutoModelForImageClassification\n",
+    "from PIL import Image\n",
+    "import requests\n",
+    "from io import BytesIO\n",
+    "\n",
+    "# Load the image processor and model\n",
+    "processor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "model = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "978c266d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:06.688101Z",
+     "iopub.status.busy": "2024-08-30T17:08:06.687019Z",
+     "iopub.status.idle": "2024-08-30T17:08:06.717748Z",
+     "shell.execute_reply": "2024-08-30T17:08:06.716873Z"
+    },
+    "papermill": {
+     "duration": 0.042119,
+     "end_time": "2024-08-30T17:08:06.720071",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:06.677952",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from PIL import Image\n",
+    "\n",
+    "# Load an image from a local path\n",
+    "img_path = '/kaggle/input/imaged/qwew.jpg'  # Replace with your local file path\n",
+    "img = Image.open(img_path)\n",
+    "\n",
+    "# Preprocess the image\n",
+    "inputs = processor(images=img, return_tensors=\"pt\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "019eb885",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:06.738709Z",
+     "iopub.status.busy": "2024-08-30T17:08:06.737888Z",
+     "iopub.status.idle": "2024-08-30T17:08:07.436337Z",
+     "shell.execute_reply": "2024-08-30T17:08:07.434656Z"
+    },
+    "papermill": {
+     "duration": 0.710486,
+     "end_time": "2024-08-30T17:08:07.438926",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:06.728440",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Predicted emotion: happy\n"
+     ]
+    }
+   ],
+   "source": [
+    "from PIL import Image\n",
+    "from transformers import AutoImageProcessor, AutoModelForImageClassification\n",
+    "\n",
+    "# Load the image processor and model\n",
+    "processor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "model = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "\n",
+    "# Load an image from a local path\n",
+    "img_path = '/kaggle/input/imaged/girl.jpg'  # Replace with your local file path\n",
+    "img = Image.open(img_path)\n",
+    "\n",
+    "# Preprocess the image\n",
+    "inputs = processor(images=img, return_tensors=\"pt\")\n",
+    "\n",
+    "# Make predictions\n",
+    "outputs = model(**inputs)\n",
+    "\n",
+    "# Get the predicted class\n",
+    "logits = outputs.logits\n",
+    "predicted_class = logits.argmax(-1).item()\n",
+    "\n",
+    "# Access the model's labels\n",
+    "labels = model.config.id2label\n",
+    "predicted_label = labels[predicted_class]\n",
+    "\n",
+    "print(f'Predicted emotion: {predicted_label}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "9f5abf48",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:07.460473Z",
+     "iopub.status.busy": "2024-08-30T17:08:07.460075Z",
+     "iopub.status.idle": "2024-08-30T17:08:08.091931Z",
+     "shell.execute_reply": "2024-08-30T17:08:08.090766Z"
+    },
+    "papermill": {
+     "duration": 0.64524,
+     "end_time": "2024-08-30T17:08:08.094255",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:07.449015",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Predicted emotion: angry\n"
+     ]
+    }
+   ],
+   "source": [
+    "from PIL import Image\n",
+    "import requests\n",
+    "from io import BytesIO\n",
+    "from transformers import AutoImageProcessor, AutoModelForImageClassification\n",
+    "\n",
+    "# Load the image processor and model\n",
+    "processor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "model = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "\n",
+    "# Define the URL of the image\n",
+    "url = 'https://th.bing.com/th/id/OIP.CEQVIV0C_Dv-MYd6pB4E5gHaEK?rs=1&pid=ImgDetMain'  # Replace with your image URL\n",
+    "\n",
+    "# Fetch the image from the URL\n",
+    "response = requests.get(url)\n",
+    "img = Image.open(BytesIO(response.content))\n",
+    "\n",
+    "# Preprocess the image\n",
+    "inputs = processor(images=img, return_tensors=\"pt\")\n",
+    "\n",
+    "# Make predictions\n",
+    "outputs = model(**inputs)\n",
+    "\n",
+    "# Get the predicted class\n",
+    "logits = outputs.logits\n",
+    "predicted_class = logits.argmax(-1).item()\n",
+    "\n",
+    "# Access the model's labels\n",
+    "labels = model.config.id2label\n",
+    "predicted_label = labels[predicted_class]\n",
+    "\n",
+    "print(f'Predicted emotion: {predicted_label}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "0afd78ce",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:08.115612Z",
+     "iopub.status.busy": "2024-08-30T17:08:08.114830Z",
+     "iopub.status.idle": "2024-08-30T17:08:24.675994Z",
+     "shell.execute_reply": "2024-08-30T17:08:24.674856Z"
+    },
+    "papermill": {
+     "duration": 16.573816,
+     "end_time": "2024-08-30T17:08:24.678213",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:08.104397",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[youtube] Extracting URL: https://www.youtube.com/watch?v=SpvC6jlqldk\n",
+      "[youtube] SpvC6jlqldk: Downloading webpage\n",
+      "[youtube] SpvC6jlqldk: Downloading ios player API JSON\n",
+      "[youtube] SpvC6jlqldk: Downloading web creator player API JSON\n",
+      "[youtube] SpvC6jlqldk: Downloading player 57c75fa4\n",
+      "[youtube] SpvC6jlqldk: Downloading m3u8 information\n",
+      "[info] SpvC6jlqldk: Downloading 1 format(s): 18\n",
+      "[download] Destination: temp_video.mp4\n",
+      "[download] 100% of   47.91MiB in 00:00:01 at 28.30MiB/s  \n",
+      "Overall emotion: angry\n",
+      "[youtube] Extracting URL: https://www.youtube.com/watch?v=vBk5y0iu3yI\n",
+      "[youtube] vBk5y0iu3yI: Downloading webpage\n",
+      "[youtube] vBk5y0iu3yI: Downloading ios player API JSON\n",
+      "[youtube] vBk5y0iu3yI: Downloading web creator player API JSON\n",
+      "[youtube] vBk5y0iu3yI: Downloading m3u8 information\n",
+      "[info] vBk5y0iu3yI: Downloading 1 format(s): 18\n",
+      "[download] Destination: temp_video.mp4\n",
+      "[download] 100% of   42.33MiB in 00:00:01 at 26.15MiB/s  \n",
+      "Overall emotion for new video: angry\n"
+     ]
+    }
+   ],
+   "source": [
+    "import yt_dlp\n",
+    "import cv2\n",
+    "import numpy as np\n",
+    "from PIL import Image\n",
+    "from transformers import AutoImageProcessor, AutoModelForImageClassification\n",
+    "import os\n",
+    "\n",
+    "# Function to delete the existing video file\n",
+    "def cleanup(file_path):\n",
+    "    if os.path.exists(file_path):\n",
+    "        os.remove(file_path)\n",
+    "\n",
+    "# Function to download video using yt-dlp\n",
+    "def download_video(url, output_path='temp_video.mp4'):\n",
+    "    cleanup(output_path)  # Ensure any existing video is deleted\n",
+    "    ydl_opts = {\n",
+    "        'format': 'mp4',\n",
+    "        'outtmpl': output_path,\n",
+    "    }\n",
+    "    with yt_dlp.YoutubeDL(ydl_opts) as ydl:\n",
+    "        ydl.download([url])\n",
+    "\n",
+    "# Extract frames from video\n",
+    "def extract_frames_from_video(video_path, num_frames=10):\n",
+    "    frames = []\n",
+    "    cap = cv2.VideoCapture(video_path)\n",
+    "    \n",
+    "    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n",
+    "    interval = total_frames // num_frames\n",
+    "    \n",
+    "    for i in range(num_frames):\n",
+    "        cap.set(cv2.CAP_PROP_POS_FRAMES, i * interval)\n",
+    "        ret, frame = cap.read()\n",
+    "        if ret:\n",
+    "            frames.append(frame)\n",
+    "    \n",
+    "    cap.release()\n",
+    "    return frames\n",
+    "\n",
+    "# Predict emotion for each frame\n",
+    "def predict_emotion(frames, processor, model):\n",
+    "    predictions = []\n",
+    "    for frame in frames:\n",
+    "        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))\n",
+    "        inputs = processor(images=img, return_tensors=\"pt\")\n",
+    "        outputs = model(**inputs)\n",
+    "        logits = outputs.logits\n",
+    "        predicted_class = logits.argmax(-1).item()\n",
+    "        labels = model.config.id2label\n",
+    "        predicted_label = labels[predicted_class]\n",
+    "        predictions.append(predicted_label)\n",
+    "    return predictions\n",
+    "\n",
+    "# Main function\n",
+    "def analyze_video_emotion(youtube_url):\n",
+    "    # Load model\n",
+    "    processor = AutoImageProcessor.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "    model = AutoModelForImageClassification.from_pretrained(\"dima806/facial_emotions_image_detection\")\n",
+    "\n",
+    "    # Download video\n",
+    "    download_video(youtube_url)\n",
+    "    \n",
+    "    # Extract frames from the downloaded video\n",
+    "    frames = extract_frames_from_video('temp_video.mp4', num_frames=10)\n",
+    "    \n",
+    "    # Predict emotion for each frame\n",
+    "    predictions = predict_emotion(frames, processor, model)\n",
+    "    \n",
+    "    # Calculate the overall emotion\n",
+    "    overall_emotion = max(set(predictions), key=predictions.count)\n",
+    "    return overall_emotion\n",
+    "\n",
+    "# Example usage\n",
+    "youtube_url = 'https://www.youtube.com/watch?v=SpvC6jlqldk' #GF\n",
+    "overall_emotion = analyze_video_emotion(youtube_url)\n",
+    "print(f'Overall emotion: {overall_emotion}')\n",
+    "\n",
+    "# Test another video\n",
+    "youtube_url_new = 'https://www.youtube.com/watch?v=vBk5y0iu3yI'#SC\n",
+    "overall_emotion_new = analyze_video_emotion(youtube_url_new)\n",
+    "print(f'Overall emotion for new video: {overall_emotion_new}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "d704f61e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:24.723702Z",
+     "iopub.status.busy": "2024-08-30T17:08:24.723279Z",
+     "iopub.status.idle": "2024-08-30T17:08:35.964666Z",
+     "shell.execute_reply": "2024-08-30T17:08:35.963610Z"
+    },
+    "papermill": {
+     "duration": 11.265319,
+     "end_time": "2024-08-30T17:08:35.966790",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:24.701471",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[youtube] Extracting URL: https://www.youtube.com/watch?v=1aZLL63wlTU\n",
+      "[youtube] 1aZLL63wlTU: Downloading webpage\n",
+      "[youtube] 1aZLL63wlTU: Downloading ios player API JSON\n",
+      "[youtube] 1aZLL63wlTU: Downloading web creator player API JSON\n",
+      "[youtube] 1aZLL63wlTU: Downloading m3u8 information\n",
+      "[info] 1aZLL63wlTU: Downloading 1 format(s): 18\n",
+      "[download] Destination: temp_video.mp4\n",
+      "[download] 100% of   99.21MiB in 00:00:05 at 17.69MiB/s  \n",
+      "Overall emotion for new video: happy\n"
+     ]
+    }
+   ],
+   "source": [
+    "#K.H SPEECH\n",
+    "\n",
+    "youtube_url_new3 = 'https://www.youtube.com/watch?v=1aZLL63wlTU'\n",
+    "overall_emotion_new = analyze_video_emotion(youtube_url_new3)\n",
+    "print(f'Overall emotion for new video: {overall_emotion_new}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "5845aed5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:36.036443Z",
+     "iopub.status.busy": "2024-08-30T17:08:36.035518Z",
+     "iopub.status.idle": "2024-08-30T17:08:47.919853Z",
+     "shell.execute_reply": "2024-08-30T17:08:47.918525Z"
+    },
+    "papermill": {
+     "duration": 11.921281,
+     "end_time": "2024-08-30T17:08:47.922116",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:36.000835",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[youtube] Extracting URL: https://www.youtube.com/watch?v=cYzXBA7zucI\n",
+      "[youtube] cYzXBA7zucI: Downloading webpage\n",
+      "[youtube] cYzXBA7zucI: Downloading ios player API JSON\n",
+      "[youtube] cYzXBA7zucI: Downloading web creator player API JSON\n",
+      "[youtube] cYzXBA7zucI: Downloading m3u8 information\n",
+      "[info] cYzXBA7zucI: Downloading 1 format(s): 18\n",
+      "[download] Destination: temp_video.mp4\n",
+      "[download] 100% of   93.81MiB in 00:00:05 at 18.01MiB/s  \n",
+      "Overall emotion for new video: angry\n"
+     ]
+    }
+   ],
+   "source": [
+    "#JDV SPEECH\n",
+    "\n",
+    "youtube_url_new3 = 'https://www.youtube.com/watch?v=cYzXBA7zucI'\n",
+    "overall_emotion_new = analyze_video_emotion(youtube_url_new3)\n",
+    "print(f'Overall emotion for new video: {overall_emotion_new}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "5713023b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:48.013638Z",
+     "iopub.status.busy": "2024-08-30T17:08:48.012871Z",
+     "iopub.status.idle": "2024-08-30T17:08:56.089584Z",
+     "shell.execute_reply": "2024-08-30T17:08:56.088218Z"
+    },
+    "papermill": {
+     "duration": 8.124999,
+     "end_time": "2024-08-30T17:08:56.091751",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:47.966752",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[youtube] Extracting URL: https://www.youtube.com/watch?v=YG37yFh7SzM\n",
+      "[youtube] YG37yFh7SzM: Downloading webpage\n",
+      "[youtube] YG37yFh7SzM: Downloading ios player API JSON\n",
+      "[youtube] YG37yFh7SzM: Downloading web creator player API JSON\n",
+      "[youtube] YG37yFh7SzM: Downloading m3u8 information\n",
+      "[info] YG37yFh7SzM: Downloading 1 format(s): 18\n",
+      "[download] Destination: temp_video.mp4\n",
+      "[download] 100% of   52.10MiB in 00:00:02 at 18.80MiB/s  \n",
+      "Overall emotion for new video: angry\n"
+     ]
+    }
+   ],
+   "source": [
+    "#T SPEECH\n",
+    "\n",
+    "youtube_url_new3 = 'https://www.youtube.com/watch?v=YG37yFh7SzM'\n",
+    "overall_emotion_new = analyze_video_emotion(youtube_url_new3)\n",
+    "print(f'Overall emotion for new video: {overall_emotion_new}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "0bc259aa",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-08-30T17:08:56.199753Z",
+     "iopub.status.busy": "2024-08-30T17:08:56.198793Z",
+     "iopub.status.idle": "2024-08-30T17:09:05.740105Z",
+     "shell.execute_reply": "2024-08-30T17:09:05.738928Z"
+    },
+    "papermill": {
+     "duration": 9.596414,
+     "end_time": "2024-08-30T17:09:05.742538",
+     "exception": false,
+     "start_time": "2024-08-30T17:08:56.146124",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[youtube] Extracting URL: https://www.youtube.com/watch?v=Mf0u5MJEjhw\n",
+      "[youtube] Mf0u5MJEjhw: Downloading webpage\n",
+      "[youtube] Mf0u5MJEjhw: Downloading ios player API JSON\n",
+      "[youtube] Mf0u5MJEjhw: Downloading web creator player API JSON\n",
+      "[youtube] Mf0u5MJEjhw: Downloading m3u8 information\n",
+      "[info] Mf0u5MJEjhw: Downloading 1 format(s): 18\n",
+      "[download] Destination: temp_video.mp4\n",
+      "[download] 100% of   67.00MiB in 00:00:02 at 22.77MiB/s  \n",
+      "Overall emotion for new video: angry\n"
+     ]
+    }
+   ],
+   "source": [
+    "#WALZ SPEECH\n",
+    "\n",
+    "youtube_url_new3 = 'https://www.youtube.com/watch?v=Mf0u5MJEjhw'\n",
+    "overall_emotion_new = analyze_video_emotion(youtube_url_new3)\n",
+    "print(f'Overall emotion for new video: {overall_emotion_new}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e0dc5ac8",
+   "metadata": {
+    "papermill": {
+     "duration": 0.05784,
+     "end_time": "2024-08-30T17:09:05.861745",
+     "exception": false,
+     "start_time": "2024-08-30T17:09:05.803905",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "gpu",
+   "dataSources": [
+    {
+     "datasetId": 5618966,
+     "sourceId": 9282942,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 30762,
+   "isGpuEnabled": true,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.14"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 143.768501,
+   "end_time": "2024-08-30T17:09:09.019302",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2024-08-30T17:06:45.250801",
+   "version": "2.6.0"
+  },
+  "widgets": {
+   "application/vnd.jupyter.widget-state+json": {
+    "state": {
+     "0a3e8a2773c447099d5ef48ffe62ddd3": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HBoxModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HBoxModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HBoxView",
+       "box_style": "",
+       "children": [
+        "IPY_MODEL_4433bf85cea3430ca6717683223146e0",
+        "IPY_MODEL_c16d4e97fef44b3986b81306aa856f21",
+        "IPY_MODEL_6868813fd8ea4470bd140227250aeeb1"
+       ],
+       "layout": "IPY_MODEL_26e13b987f49426c98d57fa558a7f801"
+      }
+     },
+     "0cde2d4cdf4f44a79c28b08390a87faf": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "DescriptionStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "DescriptionStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "description_width": ""
+      }
+     },
+     "10f369f834aa46ebac17660a9bfb908f": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "13650740844b42b5911c58934d7da880": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HBoxModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HBoxModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HBoxView",
+       "box_style": "",
+       "children": [
+        "IPY_MODEL_402a68af7f9e4fc1abfb8a170f676e40",
+        "IPY_MODEL_b3bae62d5ce0455eb8232c1c79d26761",
+        "IPY_MODEL_7f62f2c50c01402188cb794326c96b79"
+       ],
+       "layout": "IPY_MODEL_ff3317473987432b94d279571e02fc4f"
+      }
+     },
+     "18969be7387a496fbe3f4ee02d724596": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "1dd8b87eedfe4c2b882cdae8cf0c51c2": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "ProgressStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "ProgressStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "bar_color": null,
+       "description_width": ""
+      }
+     },
+     "26e13b987f49426c98d57fa558a7f801": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "30ac06a33b094935b69112efdfa7fdff": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "ProgressStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "ProgressStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "bar_color": null,
+       "description_width": ""
+      }
+     },
+     "352cb78e2915437abf9b2b0943fc87b0": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "402a68af7f9e4fc1abfb8a170f676e40": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HTMLModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HTMLModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HTMLView",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_ee3529089ad441489d706883cc094314",
+       "placeholder": "​",
+       "style": "IPY_MODEL_64005dc2aa9a4b6c9521834eb3bc8777",
+       "value": "preprocessor_config.json: 100%"
+      }
+     },
+     "41f5a9ba578042f28389384fa3613ff1": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "DescriptionStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "DescriptionStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "description_width": ""
+      }
+     },
+     "4421c082e0134431a2c8c222b9f761e5": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HTMLModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HTMLModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HTMLView",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_799ab9b31b514e2ab4147c704715e68a",
+       "placeholder": "​",
+       "style": "IPY_MODEL_f21c5a3c64404a2f95e66fe2e9e06a96",
+       "value": " 907/907 [00:00&lt;00:00, 70.9kB/s]"
+      }
+     },
+     "4433bf85cea3430ca6717683223146e0": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HTMLModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HTMLModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HTMLView",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_e4630d15f0994012b3604edae48c7028",
+       "placeholder": "​",
+       "style": "IPY_MODEL_7c9d3c33bb874587bb666896315b3b27",
+       "value": "model.safetensors: 100%"
+      }
+     },
+     "5c5ccfccd4174677bc9cb60c833e2434": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "5c8fe593b2804ddba5126d2b2a611bca": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "624c44c6aa1d4cec92b444f7b23d8a9f": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "632ad7e3bcd249e9906c1aadfa35d487": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HTMLModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HTMLModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HTMLView",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_624c44c6aa1d4cec92b444f7b23d8a9f",
+       "placeholder": "​",
+       "style": "IPY_MODEL_41f5a9ba578042f28389384fa3613ff1",
+       "value": "config.json: 100%"
+      }
+     },
+     "64005dc2aa9a4b6c9521834eb3bc8777": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "DescriptionStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "DescriptionStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "description_width": ""
+      }
+     },
+     "6868813fd8ea4470bd140227250aeeb1": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HTMLModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HTMLModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HTMLView",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_10f369f834aa46ebac17660a9bfb908f",
+       "placeholder": "​",
+       "style": "IPY_MODEL_0cde2d4cdf4f44a79c28b08390a87faf",
+       "value": " 343M/343M [00:01&lt;00:00, 268MB/s]"
+      }
+     },
+     "686b3c44eb934f7b915338d0a2330ce3": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HBoxModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HBoxModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HBoxView",
+       "box_style": "",
+       "children": [
+        "IPY_MODEL_632ad7e3bcd249e9906c1aadfa35d487",
+        "IPY_MODEL_82d27661b91941509be2c8dfc7aa1552",
+        "IPY_MODEL_4421c082e0134431a2c8c222b9f761e5"
+       ],
+       "layout": "IPY_MODEL_18969be7387a496fbe3f4ee02d724596"
+      }
+     },
+     "799ab9b31b514e2ab4147c704715e68a": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "7c9d3c33bb874587bb666896315b3b27": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "DescriptionStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "DescriptionStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "description_width": ""
+      }
+     },
+     "7f62f2c50c01402188cb794326c96b79": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "HTMLModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "HTMLModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "HTMLView",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_8d287711ff804886ab322bdb37931f72",
+       "placeholder": "​",
+       "style": "IPY_MODEL_a94cb6914a1a45dc890e8f6631fcd96b",
+       "value": " 578/578 [00:00&lt;00:00, 41.6kB/s]"
+      }
+     },
+     "82d27661b91941509be2c8dfc7aa1552": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "FloatProgressModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "FloatProgressModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "ProgressView",
+       "bar_style": "success",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_5c5ccfccd4174677bc9cb60c833e2434",
+       "max": 907.0,
+       "min": 0.0,
+       "orientation": "horizontal",
+       "style": "IPY_MODEL_30ac06a33b094935b69112efdfa7fdff",
+       "value": 907.0
+      }
+     },
+     "8d287711ff804886ab322bdb37931f72": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "a94cb6914a1a45dc890e8f6631fcd96b": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "DescriptionStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "DescriptionStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "description_width": ""
+      }
+     },
+     "b3bae62d5ce0455eb8232c1c79d26761": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "FloatProgressModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "FloatProgressModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "ProgressView",
+       "bar_style": "success",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_352cb78e2915437abf9b2b0943fc87b0",
+       "max": 578.0,
+       "min": 0.0,
+       "orientation": "horizontal",
+       "style": "IPY_MODEL_cecbc391c2554ff98c7a537dcef46b54",
+       "value": 578.0
+      }
+     },
+     "c16d4e97fef44b3986b81306aa856f21": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "FloatProgressModel",
+      "state": {
+       "_dom_classes": [],
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "FloatProgressModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/controls",
+       "_view_module_version": "1.5.0",
+       "_view_name": "ProgressView",
+       "bar_style": "success",
+       "description": "",
+       "description_tooltip": null,
+       "layout": "IPY_MODEL_5c8fe593b2804ddba5126d2b2a611bca",
+       "max": 343239356.0,
+       "min": 0.0,
+       "orientation": "horizontal",
+       "style": "IPY_MODEL_1dd8b87eedfe4c2b882cdae8cf0c51c2",
+       "value": 343239356.0
+      }
+     },
+     "cecbc391c2554ff98c7a537dcef46b54": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "ProgressStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "ProgressStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "bar_color": null,
+       "description_width": ""
+      }
+     },
+     "e4630d15f0994012b3604edae48c7028": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "ee3529089ad441489d706883cc094314": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     },
+     "f21c5a3c64404a2f95e66fe2e9e06a96": {
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "model_name": "DescriptionStyleModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/controls",
+       "_model_module_version": "1.5.0",
+       "_model_name": "DescriptionStyleModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "StyleView",
+       "description_width": ""
+      }
+     },
+     "ff3317473987432b94d279571e02fc4f": {
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "model_name": "LayoutModel",
+      "state": {
+       "_model_module": "@jupyter-widgets/base",
+       "_model_module_version": "1.2.0",
+       "_model_name": "LayoutModel",
+       "_view_count": null,
+       "_view_module": "@jupyter-widgets/base",
+       "_view_module_version": "1.2.0",
+       "_view_name": "LayoutView",
+       "align_content": null,
+       "align_items": null,
+       "align_self": null,
+       "border": null,
+       "bottom": null,
+       "display": null,
+       "flex": null,
+       "flex_flow": null,
+       "grid_area": null,
+       "grid_auto_columns": null,
+       "grid_auto_flow": null,
+       "grid_auto_rows": null,
+       "grid_column": null,
+       "grid_gap": null,
+       "grid_row": null,
+       "grid_template_areas": null,
+       "grid_template_columns": null,
+       "grid_template_rows": null,
+       "height": null,
+       "justify_content": null,
+       "justify_items": null,
+       "left": null,
+       "margin": null,
+       "max_height": null,
+       "max_width": null,
+       "min_height": null,
+       "min_width": null,
+       "object_fit": null,
+       "object_position": null,
+       "order": null,
+       "overflow": null,
+       "overflow_x": null,
+       "overflow_y": null,
+       "padding": null,
+       "right": null,
+       "top": null,
+       "visibility": null,
+       "width": null
+      }
+     }
+    },
+    "version_major": 2,
+    "version_minor": 0
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
